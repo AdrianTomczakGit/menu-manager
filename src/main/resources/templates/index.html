@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<!--
+    Adds Thymeleaf support to this HTML document.
+    Thymeleaf attributes begin with "th:".
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Defines the character encoding used by the page. -->
+    <meta charset="UTF-8">
+
+    <!-- Makes the webpage adapt to phones and smaller screens. -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <!-- Text displayed in the browser tab. -->
+    <title>Menu Manager</title>
+</head>
+
+<body>
+
+    <!-- Main page heading. -->
+    <header>
+        <h1>Menu Manager</h1>
+        <p>Create and manage menu items.</p>
+    </header>
+
+    <main>
+
+        <!-- Section containing the add-item form. -->
+        <section>
+            <h2>Add a menu item</h2>
+
+            <!--
+                th:action sets the controller address.
+
+                th:object connects this form to the empty
+                MenuItem object created by the controller.
+            -->
+            <form th:action="@{/menu-items}"
+                  th:object="${menuItem}"
+                  method="post">
+
+                <!-- Menu-item name input. -->
+                <div>
+                    <label for="name">Name:</label>
+
+                    <!--
+                        th:field connects this input to:
+                        MenuItem.name
+                    -->
+                    <input
+                        id="name"
+                        type="text"
+                        th:field="*{name}"
+                        required>
+                </div>
+
+                <!-- Menu-item description input. -->
+                <div>
+                    <label for="description">Description:</label>
+
+                    <!-- Connects to MenuItem.description. -->
+                    <textarea
+                        id="description"
+                        th:field="*{description}">
+                    </textarea>
+                </div>
+
+                <!-- Menu-item price input. -->
+                <div>
+                    <label for="price">Price:</label>
+
+                    <!--
+                        step="0.01" allows prices such as 5.99.
+                        min="0" prevents negative values in the browser.
+                    -->
+                    <input
+                        id="price"
+                        type="number"
+                        th:field="*{price}"
+                        min="0"
+                        step="0.01"
+                        required>
+                </div>
+
+                <!-- Menu-item category input. -->
+                <div>
+                    <label for="category">Category:</label>
+
+                    <!-- Connects to MenuItem.category. -->
+                    <input
+                        id="category"
+                        type="text"
+                        th:field="*{category}"
+                        required>
+                </div>
+
+                <!-- Menu-item availability checkbox. -->
+                <div>
+                    <label for="available">
+                        Available:
+                    </label>
+
+                    <!-- Connects to MenuItem.available. -->
+                    <input
+                        id="available"
+                        type="checkbox"
+                        th:field="*{available}">
+                </div>
+
+                <!-- Submits the form to the controller. -->
+                <button type="submit">
+                    Add item
+                </button>
+            </form>
+        </section>
+
+        <!-- Section displaying database records. -->
+        <section>
+            <h2>Current menu</h2>
+
+            <!--
+                This message appears only when the database
+                contains no menu items.
+            -->
+            <p th:if="${menuItems.isEmpty()}">
+                No menu items have been added yet.
+            </p>
+
+            <!--
+                th:each repeats this article once for every
+                item inside the menuItems list.
+            -->
+            <article th:each="item : ${menuItems}">
+
+                <!-- Displays the item's name. -->
+                <h3 th:text="${item.name}">
+                    Example item
+                </h3>
+
+                <!-- Displays the item's description. -->
+                <p th:text="${item.description}">
+                    Example description
+                </p>
+
+                <!-- Displays the item's price. -->
+                <p>
+                    Price:
+                    £<span th:text="${item.price}">
+                        0.00
+                    </span>
+                </p>
+
+                <!-- Displays the item's category. -->
+                <p>
+                    Category:
+                    <span th:text="${item.category}">
+                        Example category
+                    </span>
+                </p>
+
+                <!-- Displays Yes or No based on availability. -->
+                <p>
+                    Available:
+                    <span th:text="${item.available ? 'Yes' : 'No'}">
+                        Yes
+                    </span>
+                </p>
+
+                <!-- Separates menu items visually. -->
+                <hr>
+            </article>
+        </section>
+
+    </main>
+
+</body>
+</html>

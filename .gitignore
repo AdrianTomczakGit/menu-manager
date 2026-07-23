@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Ignore the local H2 database files.
+# Each developer should have their own development database.
+data/
