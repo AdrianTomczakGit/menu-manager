@@ -170,6 +170,26 @@
                     </span>
                 </p>
 
+                <!--
+                Sends a POST request containing the ID
+                of the menu item being deleted.
+                -->
+                <form
+                    th:action="@{/menu-items/{id}/delete(id=${item.id})}"
+                    method="post">
+
+                <!--
+                    The confirmation box helps prevent
+                    accidental deletion.
+                -->
+                <button
+                    type="submit"
+                    onclick="return confirm('Are you sure you want to delete this item?')">
+
+                    Delete
+                </button>
+            </form>
+
                 <!-- Separates menu items visually. -->
                 <hr>
             </article>

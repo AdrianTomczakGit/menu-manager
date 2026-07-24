@@ -7,10 +7,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.adriantomczak.menumanager.model.MenuItem;
 import com.adriantomczak.menumanager.repository.MenuItemRepository;
+
+
 
 @Controller
 public class MenuItemController {
@@ -84,4 +87,32 @@ public class MenuItemController {
          */
         return "redirect:/";
     }
+
+    /*
+ * Handles a POST request for deleting a specific menu item.
+ *
+ * Example request:
+ * /menu-items/3/delete
+ *
+ * The number 3 is the ID of the menu item.
+ */
+@PostMapping("/menu-items/{id}/delete")
+public String deleteMenuItem(@PathVariable Long id) {
+
+    /*
+     * Checks that the menu item exists before trying to delete it.
+     * This avoids an error if an invalid ID is supplied.
+     */
+    if (menuItemRepository.existsById(id)) {
+
+        // Deletes the database record with the matching ID.
+        menuItemRepository.deleteById(id);
+    }
+
+    /*
+     * Redirects the browser back to the homepage
+     * so the updated list is displayed.
+     */
+    return "redirect:/";
+}
 }
