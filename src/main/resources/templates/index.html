@@ -169,10 +169,17 @@
                         Yes
                     </span>
                 </p>
-
+                
                 <!--
-                Sends a POST request containing the ID
-                of the menu item being deleted.
+                    Opens the editing page for this specific menu item.
+                    The item's database ID is placed into the URL.
+                -->
+                <a th:href="@{/menu-items/{id}/edit(id=${item.id})}">
+                    Edit
+                </a>
+                <!--
+                    Sends a POST request containing the ID
+                    of the menu item being deleted.
                 -->
                 <form
                     th:action="@{/menu-items/{id}/delete(id=${item.id})}"

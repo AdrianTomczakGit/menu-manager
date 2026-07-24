@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<!--
+    Enables Thymeleaf attributes such as
+    th:action, th:object and th:field.
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Defines the page's text encoding. -->
+    <meta charset="UTF-8">
+
+    <!-- Makes the page responsive on smaller screens. -->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <!-- Text displayed in the browser tab. -->
+    <title>Edit Menu Item</title>
+</head>
+
+<body>
+
+    <!-- Page heading section. -->
+    <header>
+        <h1>Edit Menu Item</h1>
+        <p>Update the selected menu item.</p>
+    </header>
+
+    <main>
+
+        <!--
+            Connects this form to the existing MenuItem
+            supplied by the controller.
+        -->
+        <form
+            th:action="@{/menu-items/{id}/edit(id=${menuItem.id})}"
+            th:object="${menuItem}"
+            method="post">
+
+            <!-- Menu-item name field. -->
+            <div>
+                <label for="name">
+                    Name:
+                </label>
+
+                <!--
+                    Displays and edits the current
+                    MenuItem.name value.
+                -->
+                <input
+                    id="name"
+                    type="text"
+                    th:field="*{name}"
+                    required>
+            </div>
+
+            <!-- Menu-item description field. -->
+            <div>
+                <label for="description">
+                    Description:
+                </label>
+
+                <!--
+                    Displays and edits the current
+                    MenuItem.description value.
+                -->
+                <textarea
+                    id="description"
+                    th:field="*{description}">
+                </textarea>
+            </div>
+
+            <!-- Menu-item price field. -->
+            <div>
+                <label for="price">
+                    Price:
+                </label>
+
+                <!--
+                    step="0.01" permits values such as 6.99.
+                    min="0" prevents negative browser input.
+                -->
+                <input
+                    id="price"
+                    type="number"
+                    th:field="*{price}"
+                    min="0"
+                    step="0.01"
+                    required>
+            </div>
+
+            <!-- Menu-item category field. -->
+            <div>
+                <label for="category">
+                    Category:
+                </label>
+
+                <!-- Displays and edits MenuItem.category. -->
+                <input
+                    id="category"
+                    type="text"
+                    th:field="*{category}"
+                    required>
+            </div>
+
+            <!-- Menu-item availability field. -->
+            <div>
+                <label for="available">
+                    Available:
+                </label>
+
+                <!-- Displays and edits MenuItem.available. -->
+                <input
+                    id="available"
+                    type="checkbox"
+                    th:field="*{available}">
+            </div>
+
+            <!-- Button that submits the updated information. -->
+            <button type="submit">
+                Save Changes
+            </button>
+
+            <!--
+                Cancels editing and returns to the homepage
+                without submitting the form.
+            -->
+            <a th:href="@{/}">
+                Cancel
+            </a>
+
+        </form>
+
+    </main>
+
+</body>
+</html>

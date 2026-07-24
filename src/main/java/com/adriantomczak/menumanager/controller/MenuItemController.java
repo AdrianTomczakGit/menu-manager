@@ -115,4 +115,109 @@ public String deleteMenuItem(@PathVariable Long id) {
      */
     return "redirect:/";
 }
+
+/*
+ * Displays the editing page for one menu item.
+ *
+ * Example address:
+ * http://localhost:8080/menu-items/3/edit
+ *
+ * The number 3 represents the database ID.
+ */
+@GetMapping("/menu-items/{id}/edit")
+public String showEditForm(
+        @PathVariable Long id,
+        Model model) {
+
+    /*
+     * Searches the database for the menu item.
+     *
+     * findById() returns an Optional because the item
+     * might not exist.
+     *
+     * orElse(null) gives us null when no item is found.
+     */
+    MenuItem menuItem = menuItemRepository
+            .findById(id)
+            .orElse(null);
+
+    /*
+     * If the item does not exist, return the user
+     * to the homepage instead of displaying an error.
+     */
+    if (menuItem == null) {
+        return "redirect:/";
+    }
+
+    /*
+     * Sends the existing menu item to the HTML page.
+     *
+     * The form will begin with the item's current
+     * name, description, price and category.
+     */
+    model.addAttribute("menuItem", menuItem);
+
+    /*
+     * Displays:
+     * src/main/resources/templates/edit-item.html
+     */
+    return "edit-item";
+
+    
+}
+
+/*
+ * Processes the edit form after the user presses
+ * the Save Changes button.
+ *
+ * Example request:
+ * POST /menu-items/3/edit
+ */
+@PostMapping("/menu-items/{id}/edit")
+public String updateMenuItem(
+        @PathVariable Long id,
+        @ModelAttribute MenuItem submittedItem) {
+
+    /*
+     * Retrieves the existing database record.
+     *
+     * We update the existing object instead of creating
+     * a completely new record.
+     */
+    MenuItem existingItem = menuItemRepository
+            .findById(id)
+            .orElse(null);
+
+    /*
+     * If the selected item no longer exists,
+     * return the user to the homepage.
+     */
+    if (existingItem == null) {
+        return "redirect:/";
+    }
+
+    /*
+     * Copies the values submitted through the form
+     * into the existing database entity.
+     */
+    existingItem.setName(submittedItem.getName());
+    existingItem.setDescription(submittedItem.getDescription());
+    existingItem.setPrice(submittedItem.getPrice());
+    existingItem.setCategory(submittedItem.getCategory());
+    existingItem.setAvailable(submittedItem.isAvailable());
+
+    /*
+     * Saves the updated entity.
+     *
+     * Because existingItem already has a database ID,
+     * JPA updates the record rather than creating another one.
+     */
+    menuItemRepository.save(existingItem);
+
+    /*
+     * Returns the user to the homepage where the
+     * updated information will be displayed.
+     */
+    return "redirect:/";
+}
 }
