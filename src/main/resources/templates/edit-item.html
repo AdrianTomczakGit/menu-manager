@@ -31,13 +31,13 @@
     <main>
 
         <!--
-            Connects this form to the existing MenuItem
-            supplied by the controller.
-        -->
-        <form
-            th:action="@{/menu-items/{id}/edit(id=${menuItem.id})}"
-            th:object="${menuItem}"
-            method="post">
+    Uses the ID supplied separately by the controller.
+    This continues to work when validation fails.
+-->
+<form
+    th:action="@{/menu-items/{id}/edit(id=${itemId})}"
+    th:object="${menuItem}"
+    method="post">
 
             <!-- Menu-item name field. -->
             <div>
