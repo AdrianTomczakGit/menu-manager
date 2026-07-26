@@ -1,139 +1,175 @@
 <!DOCTYPE html>
 
-<!--
-    Enables Thymeleaf attributes such as
-    th:action, th:object and th:field.
--->
-<html lang="en"
-      xmlns:th="http://www.thymeleaf.org">
+<!-- Enables Thymeleaf attributes inside the page. -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <!-- Defines the page's text encoding. -->
+    <!-- Defines the page's character encoding. -->
     <meta charset="UTF-8">
 
-    <!-- Makes the page responsive on smaller screens. -->
+    <!-- Makes the page responsive. -->
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0">
 
     <!-- Text displayed in the browser tab. -->
     <title>Edit Menu Item</title>
+
+    <!-- Loads the same stylesheet used by the homepage. -->
+    <link
+        rel="stylesheet"
+        th:href="@{/css/style.css}">
 </head>
 
 <body>
 
-    <!-- Page heading section. -->
+    <!-- Edit-page heading. -->
     <header>
         <h1>Edit Menu Item</h1>
         <p>Update the selected menu item.</p>
     </header>
 
+    <!-- Contains the editing form. -->
     <main>
 
-        <!--
-    Uses the ID supplied separately by the controller.
-    This continues to work when validation fails.
--->
-<form
-    th:action="@{/menu-items/{id}/edit(id=${itemId})}"
-    th:object="${menuItem}"
-    method="post">
+        <section>
 
-            <!-- Menu-item name field. -->
-            <div>
-                <label for="name">
-                    Name:
-                </label>
-
-                <!--
-                    Displays and edits the current
-                    MenuItem.name value.
-                -->
-                <input
-                    id="name"
-                    type="text"
-                    th:field="*{name}"
-                    required>
-            </div>
-
-            <!-- Menu-item description field. -->
-            <div>
-                <label for="description">
-                    Description:
-                </label>
-
-                <!--
-                    Displays and edits the current
-                    MenuItem.description value.
-                -->
-                <textarea
-                    id="description"
-                    th:field="*{description}">
-                </textarea>
-            </div>
-
-            <!-- Menu-item price field. -->
-            <div>
-                <label for="price">
-                    Price:
-                </label>
-
-                <!--
-                    step="0.01" permits values such as 6.99.
-                    min="0" prevents negative browser input.
-                -->
-                <input
-                    id="price"
-                    type="number"
-                    th:field="*{price}"
-                    min="0"
-                    step="0.01"
-                    required>
-            </div>
-
-            <!-- Menu-item category field. -->
-            <div>
-                <label for="category">
-                    Category:
-                </label>
-
-                <!-- Displays and edits MenuItem.category. -->
-                <input
-                    id="category"
-                    type="text"
-                    th:field="*{category}"
-                    required>
-            </div>
-
-            <!-- Menu-item availability field. -->
-            <div>
-                <label for="available">
-                    Available:
-                </label>
-
-                <!-- Displays and edits MenuItem.available. -->
-                <input
-                    id="available"
-                    type="checkbox"
-                    th:field="*{available}">
-            </div>
-
-            <!-- Button that submits the updated information. -->
-            <button type="submit">
-                Save Changes
-            </button>
+            <h2>Item Details</h2>
 
             <!--
-                Cancels editing and returns to the homepage
-                without submitting the form.
-            -->
-            <a th:href="@{/}">
-                Cancel
-            </a>
+                Connects the form to the selected MenuItem.
 
-        </form>
+                The selected item's ID is included in the
+                form-submission address.
+            -->
+            <form
+                th:action="@{/menu-items/{id}/edit(id=${itemId})}"
+                th:object="${menuItem}"
+                method="post">
+
+                <!-- Menu-item name field. -->
+                <div>
+                    <label for="name">
+                        Name:
+                    </label>
+
+                    <!-- Displays and edits the current name. -->
+                    <input
+                        id="name"
+                        type="text"
+                        th:field="*{name}"
+                        maxlength="100"
+                        required>
+
+                    <!-- Displays a validation error for the name. -->
+                    <small
+                        th:if="${#fields.hasErrors('name')}"
+                        th:errors="*{name}">
+                        Name error
+                    </small>
+                </div>
+
+                <!-- Menu-item description field. -->
+                <div>
+                    <label for="description">
+                        Description:
+                    </label>
+
+                    <!-- Displays and edits the current description. -->
+                    <textarea
+                        id="description"
+                        th:field="*{description}"
+                        maxlength="300"></textarea>
+
+                    <!-- Displays a validation error for the description. -->
+                    <small
+                        th:if="${#fields.hasErrors('description')}"
+                        th:errors="*{description}">
+                        Description error
+                    </small>
+                </div>
+
+                <!-- Menu-item price field. -->
+                <div>
+                    <label for="price">
+                        Price:
+                    </label>
+
+                    <!-- Displays and edits the current price. -->
+                    <input
+                        id="price"
+                        type="number"
+                        th:field="*{price}"
+                        min="0.01"
+                        step="0.01"
+                        required>
+
+                    <!-- Displays a validation error for the price. -->
+                    <small
+                        th:if="${#fields.hasErrors('price')}"
+                        th:errors="*{price}">
+                        Price error
+                    </small>
+                </div>
+
+                <!-- Menu-item category field. -->
+                <div>
+                    <label for="category">
+                        Category:
+                    </label>
+
+                    <!-- Displays and edits the current category. -->
+                    <input
+                        id="category"
+                        type="text"
+                        th:field="*{category}"
+                        maxlength="50"
+                        required>
+
+                    <!-- Displays a validation error for the category. -->
+                    <small
+                        th:if="${#fields.hasErrors('category')}"
+                        th:errors="*{category}">
+                        Category error
+                    </small>
+                </div>
+
+                <!-- Menu-item availability field. -->
+                <div>
+                    <label for="available">
+                        Available:
+                    </label>
+
+                    <!-- Displays and edits the availability value. -->
+                    <input
+                        id="available"
+                        type="checkbox"
+                        th:field="*{available}">
+                </div>
+
+                <!-- Groups the Save and Cancel controls. -->
+                <div class="item-actions">
+
+                    <!-- Submits the updated information. -->
+                    <button type="submit">
+                        Save Changes
+                    </button>
+
+                    <!-- Returns home without submitting the form. -->
+                    <a
+                        class="action-link edit-button"
+                        th:href="@{/}">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </section>
 
     </main>
 
 </body>
+
 </html>
