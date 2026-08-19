@@ -1,7 +1,5 @@
-// Defines the package this controller belongs to.
 package com.adriantomczak.menumanager.controller;
 
-// Imports the MenuItem entity.
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -9,334 +7,148 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.adriantomczak.menumanager.model.MenuItem;
-import com.adriantomczak.menumanager.repository.MenuItemRepository;
+import com.adriantomczak.menumanager.service.MenuItemService;
 
 import jakarta.validation.Valid;
 
-/*
- * This controller handles browser requests relating
- * to menu items.
- *
- * It allows users to:
- * - View menu items
- * - Add menu items
- * - Edit menu items
- * - Delete menu items
+/**
+ * Handles the HTML pages and form submissions for menu items. Database and
+ * business operations are delegated to MenuItemService.
  */
 @Controller
 public class MenuItemController {
 
-    /*
-     * Stores the repository used to communicate
-     * with the menu-item database table.
-     */
-    private final MenuItemRepository menuItemRepository;
+    private final MenuItemService menuItemService;
 
-    /*
-     * Constructor injection.
-     *
-     * Spring automatically supplies the repository
-     * when it creates this controller.
-     */
-    public MenuItemController(
-            MenuItemRepository menuItemRepository) {
-
-        this.menuItemRepository = menuItemRepository;
+    public MenuItemController(MenuItemService menuItemService) {
+        this.menuItemService = menuItemService;
     }
 
-    /*
-     * Displays the homepage.
-     *
-     * Example address:
-     * http://localhost:8080/
-     */
     @GetMapping("/")
-    public String showMenu(Model model) {
+    public String showMenu(
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "") String category,
+            @RequestParam(required = false) Boolean available,
+            @RequestParam(defaultValue = "") String notice,
+            Model model) {
 
-        /*
-         * Retrieves every menu item from the database
-         * and sends the list to index.html.
-         */
-        model.addAttribute(
-                "menuItems",
-                menuItemRepository.findAll()
-        );
-
-        /*
-         * Creates an empty MenuItem object for
-         * the add-item form.
-         */
-        model.addAttribute(
-                "menuItem",
-                new MenuItem()
-        );
-
-        /*
-         * Displays:
-         * src/main/resources/templates/index.html
-         */
+        populateHomepage(model, search, category, available);
+        addNotice(model, notice);
+        model.addAttribute("menuItem", new MenuItem());
         return "index";
     }
 
-    /*
-     * Processes the form used to add a new menu item.
-     *
-     * The browser sends:
-     * POST /menu-items
-     */
     @PostMapping("/menu-items")
     public String addMenuItem(
-
-            /*
-             * @ModelAttribute connects the submitted form
-             * values to a MenuItem object.
-             *
-             * @Valid runs the validation annotations
-             * inside MenuItem.java.
-             */
-            @Valid
-            @ModelAttribute("menuItem")
-            MenuItem menuItem,
-
-            /*
-             * Contains validation errors.
-             *
-             * BindingResult must appear immediately after
-             * the object marked with @Valid.
-             */
+            @Valid @ModelAttribute("menuItem") MenuItem menuItem,
             BindingResult bindingResult,
-
-            /*
-             * Allows data to be sent back to the HTML
-             * page when validation fails.
-             */
             Model model) {
 
-        /*
-         * If validation fails, do not save the item.
-         */
         if (bindingResult.hasErrors()) {
-
-            /*
-             * Reloads the existing menu items so they
-             * still appear underneath the form.
-             */
-            model.addAttribute(
-                    "menuItems",
-                    menuItemRepository.findAll()
-            );
-
-            /*
-             * Displays the homepage again with the
-             * validation messages.
-             */
+            populateHomepage(model, "", "", null);
             return "index";
         }
 
-        /*
-         * Saves the valid menu item in the database.
-         */
-        menuItemRepository.save(menuItem);
-
-        /*
-         * Redirects the browser to the homepage.
-         */
-        return "redirect:/";
+        menuItemService.create(menuItem);
+        return "redirect:/?notice=created";
     }
 
-    /*
-     * Displays the edit form for a specific menu item.
-     *
-     * Example address:
-     * http://localhost:8080/menu-items/3/edit
-     */
     @GetMapping("/menu-items/{id}/edit")
     public String showEditForm(
-
-            // Reads the menu-item ID from the URL.
             @PathVariable Long id,
-
-            // Allows information to be sent to the edit page.
             Model model) {
 
-        /*
-         * Searches the database for the selected item.
-         *
-         * If no matching item exists, the result becomes null.
-         */
-        MenuItem menuItem = menuItemRepository
-                .findById(id)
-                .orElse(null);
-
-        /*
-         * Returns to the homepage when the supplied
-         * database ID does not exist.
-         */
-        if (menuItem == null) {
-            return "redirect:/";
-        }
-
-        /*
-         * Sends the existing menu item to the edit form.
-         *
-         * Its current values will appear inside the inputs.
-         */
-        model.addAttribute(
-                "menuItem",
-                menuItem
-        );
-
-        /*
-         * Sends the ID separately.
-         *
-         * This keeps the correct form address available
-         * if the submitted edit fails validation.
-         */
-        model.addAttribute(
-                "itemId",
-                id
-        );
-
-        /*
-         * Displays:
-         * src/main/resources/templates/edit-item.html
-         */
-        return "edit-item";
+        return menuItemService.findById(id)
+                .map(menuItem -> {
+                    model.addAttribute("menuItem", menuItem);
+                    model.addAttribute("itemId", id);
+                    return "edit-item";
+                })
+                .orElseGet(this::redirectForMissingItem);
     }
 
-    /*
-     * Processes the edit form after the user presses
-     * the Save Changes button.
-     *
-     * Example request:
-     * POST /menu-items/3/edit
-     */
     @PostMapping("/menu-items/{id}/edit")
     public String updateMenuItem(
-
-            // Reads the selected item's ID from the URL.
             @PathVariable Long id,
-
-            /*
-             * Converts the submitted form fields into
-             * a MenuItem object and runs validation.
-             */
-            @Valid
-            @ModelAttribute("menuItem")
-            MenuItem submittedItem,
-
-            /*
-             * Contains validation or conversion errors.
-             */
+            @Valid @ModelAttribute("menuItem") MenuItem submittedItem,
             BindingResult bindingResult,
-
-            /*
-             * Allows information to be returned
-             * to the edit page.
-             */
             Model model) {
 
-        /*
-         * When validation fails, return to the edit form
-         * without changing the database record.
-         */
+        // Check first so an invalid form cannot display an edit page for a missing ID.
+        if (menuItemService.findById(id).isEmpty()) {
+            return redirectForMissingItem();
+        }
+
         if (bindingResult.hasErrors()) {
-
-            /*
-             * Keeps the selected ID available to the form.
-             */
-            model.addAttribute(
-                    "itemId",
-                    id
-            );
-
-            /*
-             * Displays the edit page with validation errors.
-             */
+            model.addAttribute("itemId", id);
             return "edit-item";
         }
 
-        /*
-         * Finds the existing database record.
-         */
-        MenuItem existingItem = menuItemRepository
-                .findById(id)
-                .orElse(null);
-
-        /*
-         * Returns home if the record no longer exists.
-         */
-        if (existingItem == null) {
-            return "redirect:/";
-        }
-
-        /*
-         * Copies the validated submitted values into
-         * the existing database entity.
-         */
-        existingItem.setName(
-                submittedItem.getName()
-        );
-
-        existingItem.setDescription(
-                submittedItem.getDescription()
-        );
-
-        existingItem.setPrice(
-                submittedItem.getPrice()
-        );
-
-        existingItem.setCategory(
-                submittedItem.getCategory()
-        );
-
-        existingItem.setAvailable(
-                submittedItem.isAvailable()
-        );
-
-        /*
-         * Saves the changed entity.
-         *
-         * Because it already has an ID, JPA updates
-         * the existing record rather than adding a new one.
-         */
-        menuItemRepository.save(existingItem);
-
-        /*
-         * Redirects the browser to the homepage.
-         */
-        return "redirect:/";
+        menuItemService.update(id, submittedItem);
+        return "redirect:/?notice=updated";
     }
 
-    /*
-     * Deletes a specific menu item.
-     *
-     * Example request:
-     * POST /menu-items/3/delete
-     */
     @PostMapping("/menu-items/{id}/delete")
-    public String deleteMenuItem(
+    public String deleteMenuItem(@PathVariable Long id) {
 
-            // Reads the selected item's ID from the URL.
-            @PathVariable Long id) {
-
-        /*
-         * Checks that the database record exists before
-         * attempting to delete it.
-         */
-        if (menuItemRepository.existsById(id)) {
-
-            /*
-             * Deletes the matching menu item.
-             */
-            menuItemRepository.deleteById(id);
+        if (menuItemService.delete(id)) {
+            return "redirect:/?notice=deleted";
         }
 
-        /*
-         * Redirects the browser back to the homepage.
-         */
-        return "redirect:/";
+        return redirectForMissingItem();
+    }
+
+    /**
+     * Supplies the item list, dynamic category options and current filter values
+     * whenever the homepage is rendered, including after validation errors.
+     */
+    private void populateHomepage(
+            Model model,
+            String search,
+            String category,
+            Boolean available) {
+
+        String safeSearch = search == null ? "" : search;
+        String safeCategory = category == null ? "" : category;
+
+        model.addAttribute(
+                "menuItems",
+                menuItemService.findMenuItems(safeSearch, safeCategory, available));
+        model.addAttribute("categories", menuItemService.findCategories());
+        model.addAttribute("search", safeSearch);
+        model.addAttribute("category", safeCategory);
+        model.addAttribute("available", available);
+        model.addAttribute(
+                "filtersApplied",
+                !safeSearch.isBlank()
+                        || !safeCategory.isBlank()
+                        || available != null);
+    }
+
+    /**
+     * Notice codes provide friendly post-redirect messages without storing a
+     * session. Unknown values are deliberately ignored.
+     */
+    private void addNotice(Model model, String notice) {
+        switch (notice) {
+            case "created" -> model.addAttribute(
+                    "successMessage", "Menu item added successfully.");
+            case "updated" -> model.addAttribute(
+                    "successMessage", "Menu item updated successfully.");
+            case "deleted" -> model.addAttribute(
+                    "successMessage", "Menu item deleted successfully.");
+            case "missing" -> model.addAttribute(
+                    "warningMessage", "That menu item could not be found.");
+            default -> {
+                // No notice is required for an ordinary homepage request.
+            }
+        }
+    }
+
+    private String redirectForMissingItem() {
+        return "redirect:/?notice=missing";
     }
 }

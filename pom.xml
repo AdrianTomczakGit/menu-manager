@@ -11,25 +11,15 @@
 	<groupId>com.adriantomczak</groupId>
 	<artifactId>menu-manager</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>menu-manager</name>
-	<description>A generic menu management application</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+	<name>Menu Manager</name>
+	<description>A web application for creating and managing restaurant menu items</description>
 	<properties>
-		<java.version>21</java.version>
+		<!-- Java 17 is an LTS release and the minimum supported by Spring Boot 4. -->
+		<java.version>17</java.version>
 	</properties>
+
 	<dependencies>
+		<!-- Application dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-h2console</artifactId>
@@ -62,6 +52,8 @@
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- Focused Spring Boot test starters for the application layers. -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
